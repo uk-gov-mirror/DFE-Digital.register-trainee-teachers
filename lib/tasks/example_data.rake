@@ -9,6 +9,7 @@ namespace :example_data do
     raise "THIS TASK CANNOT BE RUN IN PRODUCTION" if Rails.env.production?
 
     Faker::Config.locale = "en-GB"
+    fake_dttp_id = "00000000-0000-0000-0000-000000000000"
 
     PERSONAS.each do |persona_attributes|
       persona = Persona.find_or_create_by!(first_name: persona_attributes[:first_name],
@@ -17,7 +18,7 @@ namespace :example_data do
                                            system_admin: persona_attributes[:system_admin])
 
       if persona_attributes[:provider]
-        provider = Provider.find_or_create_by!(name: persona_attributes[:provider])
+        provider = Provider.find_or_create_by!(name: persona_attributes[:provider], dttp_id: fake_dttp_id)
         persona.update!(provider: provider)
       end
 
@@ -75,7 +76,7 @@ namespace :example_data do
           updated_at: submitted_for_trn_at || created_at,
         }
 
-        trainee_attributes.merge!(provider: provider) if provider
+        trainee_attributes.merge!(provider: provider || FactoryBot.build(:provider, dttp_id: fake_dttp_id))
 
         trainee = FactoryBot.create(:trainee, *traits, trainee_attributes)
 
