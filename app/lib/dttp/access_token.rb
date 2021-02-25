@@ -18,7 +18,7 @@ module Dttp
     }.freeze
 
     def self.fetch
-      Rails.cache.fetch("dttp-access-token", expires_in: CACHED_TOKEN_EXPIRY_TIME) do
+      Rails.cache.fetch("dttp-access-token", expires_in: 30.seconds) do
         response = Client.post("/#{Settings.dttp.tenant_id}/oauth2/v2.0/token", body: REQUEST_BODY)
         JSON.parse(response.body)["access_token"]
       end
