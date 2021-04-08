@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_04_01_153358) do
+ActiveRecord::Schema.define(version: 2021_04_07_152050) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -227,6 +227,15 @@ ActiveRecord::Schema.define(version: 2021_04_01_153358) do
     t.index ["dttp_id"], name: "index_users_on_dttp_id", unique: true
     t.index ["email"], name: "index_users_on_email"
     t.index ["provider_id"], name: "index_users_on_provider_id"
+  end
+
+  create_table "validation_errors", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "form_object"
+    t.jsonb "details"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id"], name: "index_validation_errors_on_user_id"
   end
 
   add_foreign_key "course_subjects", "courses"
