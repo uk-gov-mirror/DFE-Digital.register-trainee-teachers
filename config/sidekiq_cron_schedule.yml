@@ -14,3 +14,7 @@ import_courses_from_ttapi:
   cron: "0 2 * * *"
   class: "TeacherTrainingApi::ImportCoursesJob"
   queue: default
+import_providers_from_dttp:
+  cron: "0 4 * * *"
+  class: "Dttp::SyncProvidersJob"
+  queue: dttp
