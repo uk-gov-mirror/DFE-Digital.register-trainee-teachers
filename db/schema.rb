@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_04_20_150757) do
+ActiveRecord::Schema.define(version: 2021_04_21_152846) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -168,12 +168,13 @@ ActiveRecord::Schema.define(version: 2021_04_20_150757) do
   create_table "schools", force: :cascade do |t|
     t.string "urn", null: false
     t.string "name", null: false
-    t.string "postcode", null: false
-    t.string "town", null: false
+    t.string "postcode"
+    t.string "town"
     t.date "open_date"
     t.date "close_date"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.boolean "lead_school", null: false
     t.index ["urn"], name: "index_schools_on_urn", unique: true
   end
 
