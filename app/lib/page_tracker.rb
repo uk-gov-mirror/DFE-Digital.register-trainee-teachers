@@ -18,11 +18,13 @@ class PageTracker
   def save!
     return unless on_trainee_specific_pages?
 
+    validate_referer_not_cached(history)
     reset_history_to_current_path
     history << request.fullpath if request.get? && !history.include?(request.fullpath)
   end
 
   def save_as_origin!
+    validate_referer_not_cached(origin_pages)
     reset_origin_pages_to_current_path
     origin_pages << request.fullpath unless origin_pages.include?(request.fullpath)
   end
@@ -89,5 +91,16 @@ private
     edit_page_paths = history.select { |path| path.include?("edit") }
 
     confirm_path.nil? && edit_page_paths.size == 1
+  end
+
+  def validate_referer_not_cached(store)
+    # Sometimes the page is loaded from cache
+    # and not registered in history or origin pages
+    # The following code ensures that the cached page is
+    # included in the history/origin_pages, by checking the referer
+    # (when we leave the cached page)
+    # was registered in the first place
+    # and appended to the history/origin if it wasnt
+    store << request.referer if request.get? && store.last != request.referer.split("https://localhost:5000").last
   end
 end
