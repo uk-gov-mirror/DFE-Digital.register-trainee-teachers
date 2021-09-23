@@ -61,15 +61,8 @@ private
   end
 
   def populate_invalid_fields
-    fields = []
-
-    apply_application&.invalid_data&.each do |section_key, field_and_values|
-      field_names = section_key == "degrees" ? populate_degree_fields(field_and_values) : field_and_values.keys
-      fields << field_names
-    end
-
-    fields.flatten(1).map do |degree_fields|
-      degree_fields.sort { |a, b| APPLY_INVALID_DATA_FIELDS_ORDER.find_index(a) <=> APPLY_INVALID_DATA_FIELDS_ORDER.find_index(b) }
+    (apply_application&.invalid_data || []).map do |section_key, field_and_values|
+      section_key == "degrees" ? populate_degree_fields(field_and_values) : field_and_values.keys
     end
   end
 
@@ -77,8 +70,8 @@ private
     return [degree_fields[degree.to_param]&.keys].compact if degree.present?
 
     degree_fields.map do |_k, field_and_values|
-      field_and_values.keys
-    end
+      field_and_values.keys.sort { |a, b| APPLY_INVALID_DATA_FIELDS_ORDER.find_index(a) <=> APPLY_INVALID_DATA_FIELDS_ORDER.find_index(b) }
+    end.flatten
   end
 
   def get_field_name(field)
