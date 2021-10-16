@@ -48,10 +48,10 @@ jobs:
 
           if [ ! -z "$pr_state_file" ]; then echo "TF_STATE_EXISTS=true" >> $GITHUB_ENV; fi;
 
-          . terraform/workspace-variables/review.sh
-          echo "TF_VAR_key_vault_name=$TF_VAR_key_vault_name" >> $GITHUB_ENV
-          echo "TF_VAR_key_vault_app_secret_name=$TF_VAR_key_vault_app_secret_name" >> $GITHUB_ENV
-          echo "TF_VAR_key_vault_infra_secret_name=$TF_VAR_key_vault_infra_secret_name" >> $GITHUB_ENV
+          eval $(make review print-keyvault-config)
+          echo "key_vault_name=$key_vault_name" >> $GITHUB_ENV
+          echo "key_vault_app_secret_name=$key_vault_app_secret_name" >> $GITHUB_ENV
+          echo "key_vault_infra_secret_name=$key_vault_infra_secret_name" >> $GITHUB_ENV
         env:
           AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING_REVIEW }}
 
@@ -64,10 +64,10 @@ jobs:
         if: env.TF_STATE_EXISTS == 'true'
         uses: DFE-Digital/github-actions/validate-key-vault-secrets@master
         with:
-          KEY_VAULT: ${{ env.TF_VAR_key_vault_name }}
+          KEY_VAULT: ${{ env.key_vault_name }}
           SECRETS: |
-            ${{ env.TF_VAR_key_vault_app_secret_name }}
-            ${{ env.TF_VAR_key_vault_infra_secret_name }}
+            ${{ env.key_vault_app_secret_name }}
+            ${{ env.key_vault_infra_secret_name }}
 
       - name: Terraform destroy
         if: env.TF_STATE_EXISTS == 'true'
