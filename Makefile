@@ -88,8 +88,8 @@ edit-app-secrets: read-keyvault-config install-fetch-config set-azure-account
 		-e -d azure-key-vault-secret:${key_vault_name}/${key_vault_app_secret_name} -f yaml -c
 
 edit-infra-secrets: read-keyvault-config install-fetch-config set-azure-account
-	bin/fetch_config.rb -s azure-key-vault-secret:${key_vault_name}/${key_vault_infra_secret_name} \
-		-e -d azure-key-vault-secret:${key_vault_name}/${key_vault_infra_secret_name} -f yaml -c
+	bin/fetch_config.rb -s azure-key-vault-secret:${key_vault_name}/${key_vault_infra_secret_name}-TEST \
+		-e -d azure-key-vault-secret:${key_vault_name}/${key_vault_infra_secret_name}-TEST -f yaml -c
 
 print-app-secrets: read-keyvault-config install-fetch-config set-azure-account
 	bin/fetch_config.rb -s azure-key-vault-secret:${key_vault_name}/${key_vault_app_secret_name} -f yaml
