@@ -76,7 +76,7 @@ jobs:
           fi
 
           echo "DEPLOY_ENV=${DEPLOY_ENV}" >> $GITHUB_ENV
-          eval $(make ${DEPLOY_ENV} print-keyvault-config)
+          eval $(make ${DEPLOY_ENV} print-keyvault-config APP_NAME=ignored)
           echo "key_vault_name=$key_vault_name" >> $GITHUB_ENV
           echo "key_vault_app_secret_name=$key_vault_app_secret_name" >> $GITHUB_ENV
           echo "key_vault_infra_secret_name=$key_vault_infra_secret_name" >> $GITHUB_ENV

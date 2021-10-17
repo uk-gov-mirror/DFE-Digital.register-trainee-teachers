@@ -48,7 +48,7 @@ jobs:
 
           if [ ! -z "$pr_state_file" ]; then echo "TF_STATE_EXISTS=true" >> $GITHUB_ENV; fi;
 
-          eval $(make review print-keyvault-config)
+          eval $(make review print-keyvault-config APP_NAME=ignored)
           echo "key_vault_name=$key_vault_name" >> $GITHUB_ENV
           echo "key_vault_app_secret_name=$key_vault_app_secret_name" >> $GITHUB_ENV
           echo "key_vault_infra_secret_name=$key_vault_infra_secret_name" >> $GITHUB_ENV

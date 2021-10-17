@@ -34,7 +34,6 @@ review:
 	$(eval export TF_VAR_paas_web_app_hostname=$(APP_NAME))
 	$(eval SPACE=bat-qa)
 	$(eval AZ_SUBSCRIPTION=s121-findpostgraduateteachertraining-development)
-	echo https://register-pr-$(APP_NAME).london.cloudapps.digital will be created in bat-qa space
 
 local: ## Configure local dev environment
 	$(eval DEPLOY_ENV=local)
