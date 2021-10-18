@@ -28,9 +28,9 @@ jobs:
     - name: Use space name
       run: echo SPACE_NAME=$SPACE_NAME
 
-    - uses: azure/login@v1
-      with:
-        creds: ${{ secrets[format('AZURE_CREDENTIALS_{0}', 'review')] }}
+    # - uses: azure/login@v1
+    #   with:
+    #     creds: ${{ secrets[format('AZURE_CREDENTIALS_{0}', 'review')] }}
 
     - id: colin
       uses: DFE-Digital/github-actions/yaml-secret@yaml-secret
