@@ -1,0 +1,73 @@
+name: build
+
+on:
+  push:
+   branches:
+    - colin-kv
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_IMAGE: dfedigital/register-trainee-teachers
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_HOSTNAME: localhost
+
+    steps:
+    - uses: actions/checkout@v2
+      name: Checkout
+
+    - name: Read kv config
+      run: |
+        echo "KEY_VAULT_NAME=s121d01-shared-kv-01" >> $GITHUB_ENV
+        echo "KEY_VAULT_INFRA_SECRET_NAME=BAT-INFRA-SECRETS-QA" >> $GITHUB_ENV
+
+    # - uses: azure/login@v1
+    #   with:
+    #     creds: ${{ secrets[format('AZURE_CREDENTIALS_{0}', 'review')] }}
+
+    - id: colin
+      uses: DFE-Digital/github-actions/yaml-secret@yaml-secret
+      with:
+        azure-credentials: ${{ secrets[format('AZURE_CREDENTIALS_{0}', 'review')] }}
+        keyvault: ${{ env.KEY_VAULT_NAME }}
+        yaml_secret: ${{ env.KEY_VAULT_INFRA_SECRET_NAME }}-TEST
+        secret: TEST_COLIN
+
+    - id: colin2
+      uses: DFE-Digital/github-actions/yaml-secret@yaml-secret
+      with:
+        azure-credentials: ${{ secrets[format('AZURE_CREDENTIALS_{0}', 'review')] }}
+        keyvault: ${{ env.KEY_VAULT_NAME }}
+        yaml_secret: ${{ env.KEY_VAULT_INFRA_SECRET_NAME }}-TEST
+        secret: TEST_COLIN_2
+
+
+    - name: Use test secret
+      run: |
+        echo "TEST_COLIN===000${{steps.colin.outputs.secret-value}}000"
+        echo "TEST_COLIN_2===000${{steps.colin2.outputs.secret-value}}000"
+
+    # - uses: Azure/get-keyvault-secrets@v1
+    #   with:
+    #     keyvault: ${{ env.KEY_VAULT_NAME }}
+    #     secrets: ${{ env.KEY_VAULT_INFRA_SECRET_NAME }}
+    #   id: myGetSecretAction
+
+    # - uses: DamianReeves/write-file-action@master
+    #   with:
+    #     path: secret.yml
+    #     contents: |
+    #       ${{ steps.myGetSecretAction.outputs[env.KEY_VAULT_INFRA_SECRET_NAME] }}
+    #     write-mode: overwrite
+
+    # - name: Read from yaml
+    #   uses: mikefarah/yq@master
+    #   id: test_colin
+    #   with:
+    #     cmd: yq eval '.TEST_COLIN' 'secret.yml'
+
+    # - name: Use test secret
+    #   run: |
+    #     echo "TEST_COLIN===***${{steps.test_colin.outputs.result}}***"
