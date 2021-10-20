@@ -43,11 +43,29 @@ jobs:
         yaml_secret: ${{ env.KEY_VAULT_INFRA_SECRET_NAME }}-TEST
         secret: TEST_COLIN_2
 
+    - id: colin3
+      uses: DFE-Digital/github-actions/yaml-secret@yaml-secret
+      with:
+        azure-credentials: ${{ secrets[format('AZURE_CREDENTIALS_{0}', 'review')] }}
+        keyvault: ${{ env.KEY_VAULT_NAME }}
+        yaml_secret: ${{ env.KEY_VAULT_INFRA_SECRET_NAME }}-TEST
+        secret: TEST_COLIN_3
+
+    - id: colin4
+      uses: DFE-Digital/github-actions/yaml-secret@yaml-secret
+      with:
+        azure-credentials: ${{ secrets[format('AZURE_CREDENTIALS_{0}', 'review')] }}
+        keyvault: ${{ env.KEY_VAULT_NAME }}
+        yaml_secret: ${{ env.KEY_VAULT_INFRA_SECRET_NAME }}-TEST
+        secret: TEST_COLIN_4
+
 
     - name: Use test secret
       run: |
         echo "TEST_COLIN===000${{steps.colin.outputs.secret-value}}000"
         echo "TEST_COLIN_2===000${{steps.colin2.outputs.secret-value}}000"
+        echo "TEST_COLIN_3===000${{steps.colin3.outputs.secret-value}}000"
+        echo "TEST_COLIN_4===000${{steps.colin4.outputs.secret-value}}000"
 
     # - uses: Azure/get-keyvault-secrets@v1
     #   with:
