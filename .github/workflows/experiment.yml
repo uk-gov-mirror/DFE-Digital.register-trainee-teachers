@@ -23,9 +23,9 @@ jobs:
         echo "KEY_VAULT_NAME=s121d01-shared-kv-01" >> $GITHUB_ENV
         echo "KEY_VAULT_INFRA_SECRET_NAME=BAT-INFRA-SECRETS-QA" >> $GITHUB_ENV
 
-    - uses: azure/login@v1
-      with:
-        creds: ${{ secrets[format('AZURE_CREDENTIALS_{0}', 'review')] }}
+    # - uses: azure/login@v1
+    #   with:
+    #     creds: ${{ secrets[format('AZURE_CREDENTIALS_{0}', 'review')] }}
 
     - id: colin
       uses: DFE-Digital/github-actions/yaml-secret@yaml-secret
