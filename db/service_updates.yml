@@ -1,3 +1,11 @@
+- date: '2022-01-20'
+  title: When you need to provide trainee start dates has changed
+  content: >-
+    When registering a trainee, we were always asking for a start date, even if the course had not started. Now, we will only ask for a start date once the course has started.
+    
+    
+    You’ll need to provide a start date before you can recommend a trainee for QTS or EYTS.
+
 - date: '2022-01-04'
   title: Draft records are now separate from the list of registered records
   content: >-
