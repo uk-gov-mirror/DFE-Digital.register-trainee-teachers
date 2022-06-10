@@ -10,6 +10,10 @@ module ApplyApi
     let(:application_data) { double("application_data") }
     let(:application_record) { double("application_record") }
 
+    around do |example|
+      Timecop.freeze { example.run }
+    end
+
     before do
       allow(RetrieveApplications).to receive(:call).and_return([application_data])
       allow(Settings.apply_applications.import).to receive(:recruitment_cycle_years).and_return([recruitment_cycle_year])
@@ -46,6 +50,24 @@ module ApplyApi
           expect(ImportApplication).to receive(:call).with(application_data: application_data).and_return(application_record)
 
           described_class.perform_now
+        end
+      end
+
+      context "when retrieving multiple years" do
+        let(:last_sync) { Time.zone.today }
+
+        before { create(:apply_application_sync_request, :successful, created_at: last_sync) }
+
+        it "imports just the new applications from Apply for both years using the same last sync date" do
+          allow(RetrieveApplications).to receive(:call) do
+            ApplyApplicationSyncRequest.create!(successful: true, response_code: 200)
+            [application_data]
+          end
+          expect(RetrieveApplications).to receive(:call).with(changed_since: last_sync, recruitment_cycle_year: 2021)
+          expect(RetrieveApplications).to receive(:call).with(changed_since: last_sync, recruitment_cycle_year: 2022)
+          expect(ImportApplication).to receive(:call).with(application_data: application_data).and_return(application_record).twice
+
+          described_class.perform_now(from_date: nil, recruitment_cycle_years: [2021, 2022])
         end
       end
 

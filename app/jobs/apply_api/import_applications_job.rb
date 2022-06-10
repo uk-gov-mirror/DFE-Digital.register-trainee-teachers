@@ -9,6 +9,8 @@ module ApplyApi
 
       return unless FeatureService.enabled?("import_applications_from_apply")
 
+      reset_last_successful_sync
+
       recruitment_cycle_years.each do |recruitment_cycle_year|
         new_applications(recruitment_cycle_year).each do |application_data|
           ImportApplication.call(application_data: application_data)
@@ -26,7 +28,11 @@ module ApplyApi
     end
 
     def last_successful_sync
-      ApplyApplicationSyncRequest.successful.maximum(:created_at)
+      @last_successful_sync ||= ApplyApplicationSyncRequest.successful.maximum(:created_at)
+    end
+
+    def reset_last_successful_sync
+      @last_successful_sync = nil
     end
   end
 end
