@@ -18,20 +18,19 @@ module ApplyApi
     attr_reader :changed_since, :recruitment_cycle_year
 
     def applications
-      current_page = 1
-
       Enumerator.new do |enumerator|
         loop do
-          response = get_response(current_page)
-          JSON(response.body)["data"].each do |application_data|
+          response = get_response(1)
+          data = JSON(response.body)["data"]
+          data.each do |application_data|
             enumerator.yield(application_data)
           end
 
           page_count = response.headers["Total-Pages"]&.to_i || 1
 
-          break unless page_count > current_page
+          break unless page_count > 1
 
-          current_page += 1
+          @changed_since = Time.parse(data.last['attributes']['updated_at'])
         end
 
         log_request!

@@ -26,7 +26,7 @@ module ApplyApi
           end
 
           it "returns all the Apply applications" do
-            expect(subject).to contain_exactly(ApiStubs::ApplyApi.application)
+            expect(subject).to contain_exactly(ApiStubs::ApplyApi.application.deep_stringify_keys)
           end
 
           context "when there are no applications" do
@@ -56,14 +56,14 @@ module ApplyApi
               status: status,
               body: ApiStubs::ApplyApi.applications_page_2,
               headers: {
-                "Current-Page" => "2",
+                "Current-Page" => "1",
                 "Page-Items" => "1",
-                "Total-Pages" => "2",
-                "Total-Count" => "3",
+                "Total-Pages" => "1",
+                "Total-Count" => "1",
               },
             }
           }
-          let(:expected_path_page_2) { "/applications?recruitment_cycle_year=#{recruitment_cycle_year}&page=2" }
+          let(:expected_path_page_2) { "/applications?recruitment_cycle_year=#{recruitment_cycle_year}&page=1&changed_since=2020-06-17T08:05:53Z" }
           let(:request_url_page_2) { "#{Settings.apply_api.base_url}#{expected_path_page_2}" }
 
           before do
@@ -77,9 +77,9 @@ module ApplyApi
 
           it "returns all the Apply applications" do
             expect(subject).to contain_exactly(
-              ApiStubs::ApplyApi.application(id: "3772"),
-              ApiStubs::ApplyApi.application(id: "3773"),
-              ApiStubs::ApplyApi.application(id: "3774"),
+              ApiStubs::ApplyApi.application(id: "3772").deep_stringify_keys,
+              ApiStubs::ApplyApi.application(id: "3773").deep_stringify_keys,
+              ApiStubs::ApplyApi.application(id: "3774").deep_stringify_keys,
             )
           end
         end
