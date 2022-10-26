@@ -1,0 +1,92 @@
+name: Copy database from environment to environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      from_environment:
+        required: true
+        type: choice
+        options:
+        - qa
+        - staging
+        - production
+        - productiondata
+        default: false
+      to_environment:
+        required: true
+        type: choice
+        options:
+        - qa
+        - staging
+        - production
+        - productiondata
+        default: false
+
+jobs:
+  backup:
+    name: Backup PaaS Database (${{inputs.from_environment}})
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      name: Checkout
+
+    - name: Setup postgres client
+      uses: DFE-Digital/github-actions/install-postgres-client@master
+
+    - name: Set environment variables
+      run: |
+        from_env_tf_vars_file=terraform/workspace-variables/${{inputs.from_environment}}.tfvars.json
+        echo "from_env_key_vault_name=$(jq -r '.key_vault_name' ${from_env_tf_vars_file})" >> $GITHUB_ENV
+        echo "from_env_key_vault_infra_secret_name=$(jq -r '.key_vault_infra_secret_name' ${from_env_tf_vars_file})" >> $GITHUB_ENV
+        echo "from_env_paas_space_name=$(jq -r '.paas_space_name' ${from_env_tf_vars_file})" >> $GITHUB_ENV
+
+        to_env_tf_vars_file=terraform/workspace-variables/${{inputs.from_environment}}.tfvars.json
+        echo "to_env_key_vault_name=$(jq -r '.key_vault_name' ${to_env_tf_vars_file})" >> $GITHUB_ENV
+        echo "to_env_key_vault_infra_secret_name=$(jq -r '.key_vault_infra_secret_name' ${to_env_tf_vars_file})" >> $GITHUB_ENV
+        echo "to_env_paas_space_name=$(jq -r '.paas_space_name' ${to_env_tf_vars_file})" >> $GITHUB_ENV
+
+        echo "BACKUP_FILE_NAME=register_${{inputs.from_environment}}_$(date +"%F")" >> $GITHUB_ENV
+
+    - name: Login to Azure ${{inputs.from_environment}} environment subscription
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS_${{inputs.from_environment}} }}
+
+    - uses: DFE-Digital/keyvault-yaml-secret@v1
+      id: from-env-get-secrets
+      with:
+        keyvault: ${{ env.from_env_key_vault_name }}
+        secret: ${{ env.from_env_key_vault_infra_secret_name }}
+        key: CF_USER,CF_PASSWORD
+
+    - name: Setup cf cli to ${{ env.from_env_paas_space_name }} space
+      uses: DFE-Digital/github-actions/setup-cf-cli@master
+      with:
+        CF_USERNAME:   ${{ steps.from-env-get-secrets.outputs.CF_USER }}
+        CF_PASSWORD:   ${{ steps.from-env-get-secrets.outputs.CF_PASSWORD }}
+        CF_SPACE_NAME: ${{ env.from_env_paas_space_name }}
+        INSTALL_CONDUIT: true
+
+    - name: Backup ${{inputs.from_environment}} DB
+      run: |
+        cf conduit register-postgres-${{inputs.from_environment}} -- pg_dump -E utf8 --clean --if-exists --no-owner --verbose --no-password -f ${BACKUP_FILE_NAME}.sql
+        tar -cvzf ${BACKUP_FILE_NAME}.tar.gz ${BACKUP_FILE_NAME}.sql
+
+    - uses: DFE-Digital/keyvault-yaml-secret@v1
+      id: to-env-get-secrets
+      with:
+        keyvault: ${{ env.to_env_key_vault_name }}
+        secret: ${{ env.to_env_key_vault_infra_secret_name }}
+        key: CF_USER,CF_PASSWORD
+
+    - name: Setup cf cli to ${{ env.to_env_paas_space_name }} space
+      uses: DFE-Digital/github-actions/setup-cf-cli@master
+      with:
+        CF_USERNAME:   ${{ steps.to-env-get-secrets.outputs.CF_USER }}
+        CF_PASSWORD:   ${{ steps.to-env-get-secrets.outputs.CF_PASSWORD }}
+        CF_SPACE_NAME: ${{ env.to_env_paas_space_name }}
+        INSTALL_CONDUIT: true
+
+    - name: Restore backup to ${{inputs.to_environment}}
+      run: |
+        cf conduit register-postgres-${{inputs.to_environment}} -- psql < ${{ env.BACKUP_FILE_NAME }}.sql
