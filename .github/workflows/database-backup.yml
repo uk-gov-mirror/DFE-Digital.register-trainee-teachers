@@ -69,10 +69,10 @@ jobs:
     - name: Set environment variable
       run: echo "BACKUP_FILE_NAME=register_prod_$(date +"%F")" >> $GITHUB_ENV
 
-    - name: Backup Prod DB
-      run: |
-        cf conduit register-postgres-13-production -- pg_dump -E utf8 --clean --if-exists --no-owner --verbose --no-password -f ${BACKUP_FILE_NAME}.sql
-        tar -cvzf ${BACKUP_FILE_NAME}.tar.gz ${BACKUP_FILE_NAME}.sql
+    # - name: Backup Prod DB
+    #   run: |
+    #     cf conduit register-postgres-13-production -- pg_dump -E utf8 --clean --if-exists --no-owner --verbose --no-password -f ${BACKUP_FILE_NAME}.sql
+    #     tar -cvzf ${BACKUP_FILE_NAME}.tar.gz ${BACKUP_FILE_NAME}.sql
 
     - name: Set Connection String
       run: |
@@ -80,43 +80,50 @@ jobs:
         echo "::add-mask::$STORAGE_CONN_STR"
         echo "STORAGE_CONN_STR=$STORAGE_CONN_STR" >> $GITHUB_ENV
 
-    - name: Upload Backup to Azure Storage
+    - name: Download Backup from Azure Storage
       run: |
-        az storage blob upload --container-name prod-db-backup \
-        --file ${BACKUP_FILE_NAME}.tar.gz --name ${BACKUP_FILE_NAME}.tar.gz --overwrite \
+        az storage blob download --container-name prod-db-backup \
+        --file ${BACKUP_FILE_NAME}.tar.gz --name ${BACKUP_FILE_NAME}.tar.gz \
         --connection-string '${{ env.STORAGE_CONN_STR }}'
+        tar xzf ${BACKUP_FILE_NAME}.tar.gz
 
-    - name: Sanitise the Database backup
-      run: |
-        echo "::group::Restore backup to intermediate database"
-        createdb ${DATABASE_NAME} && psql -f ${{ env.BACKUP_FILE_NAME }}.sql -d ${DATABASE_NAME}
-        echo "::endgroup::"
+    # - name: Upload Backup to Azure Storage
+    #   run: |
+    #     az storage blob upload --container-name prod-db-backup \
+    #     --file ${BACKUP_FILE_NAME}.tar.gz --name ${BACKUP_FILE_NAME}.tar.gz --overwrite \
+    #     --connection-string '${{ env.STORAGE_CONN_STR }}'
 
-        echo "::group::Sanitise user data"
-        psql -d ${DATABASE_NAME} -f db/scripts/sanitise.sql
-        echo "::endgroup::"
+    # - name: Sanitise the Database backup
+    #   run: |
+    #     echo "::group::Restore backup to intermediate database"
+    #     createdb ${DATABASE_NAME} && psql -f ${{ env.BACKUP_FILE_NAME }}.sql -d ${DATABASE_NAME}
+    #     echo "::endgroup::"
 
-        echo "::group::Backup Sanitised Database"
-        pg_dump --encoding utf8 --clean --no-owner --if-exists -d ${DATABASE_NAME} -f backup_sanitised.sql
-        echo "::endgroup::"
-      env:
-        DATABASE_NAME: register_trainee_teachers
-        PGUSER:  postgres
-        PGPASSWORD: postgres
-        PGHOST: localhost
-        PGPORT: 5432
+    #     echo "::group::Sanitise user data"
+    #     psql -d ${DATABASE_NAME} -f db/scripts/sanitise.sql
+    #     echo "::endgroup::"
 
-    - name: Upload Sanitised Backup
-      uses: actions/upload-artifact@v3
-      with:
-        name: backup_sanitised
-        path: backup_sanitised.sql
-        retention-days: 3
+    #     echo "::group::Backup Sanitised Database"
+    #     pg_dump --encoding utf8 --clean --no-owner --if-exists -d ${DATABASE_NAME} -f backup_sanitised.sql
+    #     echo "::endgroup::"
+    #   env:
+    #     DATABASE_NAME: register_trainee_teachers
+    #     PGUSER:  postgres
+    #     PGPASSWORD: postgres
+    #     PGHOST: localhost
+    #     PGPORT: 5432
 
-    - name: Restore backup to productiondata
-      if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.restoreToProductionDataEnv == 'true') }}
-      run: |
-        cf conduit register-postgres-13-productiondata -- psql < ${{ env.BACKUP_FILE_NAME }}.sql
+    # - name: Upload Sanitised Backup
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: backup_sanitised
+    #     path: backup_sanitised.sql
+    #     retention-days: 3
+
+    # - name: Restore backup to productiondata
+    #   if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.restoreToProductionDataEnv == 'true') }}
+    #   run: |
+    #     cf conduit register-postgres-13-productiondata -- psql < ${{ env.BACKUP_FILE_NAME }}.sql
 
     - name: Restore backup to analysis
       if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.restoreToProductionAnalysisEnv == 'true') }}
