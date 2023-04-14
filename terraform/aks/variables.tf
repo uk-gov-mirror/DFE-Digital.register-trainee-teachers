@@ -251,3 +251,5 @@ variable azure_tempdata_storage_account_name {}
 variable azure_storage_account_replication_type { default = "LRS"}
 
 variable azure_region_name { default = "uk south" }
+
+variable "review_app" {default = false }
