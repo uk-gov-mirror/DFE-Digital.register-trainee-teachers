@@ -1,4 +1,5 @@
 resource "azurerm_storage_account" "tempdata" {
+  count = var.review_app ? 0 : 1
   name                              = var.tempdata_storage_account_name
   resource_group_name               = var.backend_resource_group_name
   location                          = var.region_name
@@ -26,7 +27,8 @@ resource "azurerm_storage_account" "tempdata" {
 }
 
 resource "azurerm_storage_container" "tempdata" {
+  count = var.review_app ? 0 : 1
   name                  = "tempdata"
-  storage_account_name  = azurerm_storage_account.tempdata.name
+  storage_account_name  = var.tempdata_storage_account_name
   container_access_type = "private"
 }

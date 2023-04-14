@@ -26,3 +26,5 @@ variable "region_name" {
 locals {
   hosting_environment = var.environment_name
 }
+
+variable "review_app" {default = false }
