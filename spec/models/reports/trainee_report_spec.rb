@@ -337,7 +337,6 @@ describe Reports::TraineeReport do
     let!(:trainee) { create(:trainee, :eyts_recommended, start_academic_cycle: current_cycle, end_academic_cycle: nil) }
 
     it 'returns a blank age range' do
-      p trainee.award_type
       expect(subject.course_age_range).to eq(" ")
     end
   end
