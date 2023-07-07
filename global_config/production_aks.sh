@@ -1,8 +1,8 @@
-CONFIG=production_aks
+CONFIG=production
 APP_ENV=${CONFIG}
 CONFIG_SHORT=pd
-AZ_SUBSCRIPTION=s189-teacher-services-cloud-production
-RESOURCE_NAME_PREFIX=s189p01
+AZ_SUBSCRIPTION=s189-teacher-services-cloud-development
+RESOURCE_NAME_PREFIX=s189d01
 ENV_TAG=Prod
 PLATFORM=aks
 CLUSTER_SHORT=pd

@@ -352,7 +352,7 @@ domains-destroy: domains-init # make register qa domains-destroy
 	terraform -chdir=terraform/custom_domains/environment_domains destroy -var-file workspace_variables/${DOMAINS_ID}_${DEPLOY_ENV}.tfvars.json
 
 set-production-subscription:
-	$(eval AZ_SUBSCRIPTION=s189-teacher-services-cloud-production)
+	$(eval AZ_SUBSCRIPTION=s189-teacher-services-cloud-development)
 
 domain-azure-resources: set-azure-account set-azure-template-tag set-azure-resource-group-tags #
 	$(if $(AUTO_APPROVE), , $(error can only run with AUTO_APPROVE))
