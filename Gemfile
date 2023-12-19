@@ -129,6 +129,8 @@ gem "cssbundling-rails"
 gem "jsbundling-rails"
 gem "strong_migrations"
 
+gem "rack-attack"
+
 group :qa, :review, :staging, :production do
   # Pull list of CloudFront proxies so request.remote_ip returns the correct IP.
   gem "azure-storage-common", "~> 2.0", ">= 2.0.4"
