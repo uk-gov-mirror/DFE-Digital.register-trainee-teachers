@@ -91,7 +91,7 @@ runs:
       shell: bash
       run: |
         echo "cluster_rg=s189d01-tsc-dv-rg" >> $GITHUB_ENV
-        echo "cluster_name=s189d01-tsc-cluster1-aks" >> $GITHUB_ENV
+        echo "cluster_name=s189d01-tsc-cluster3-aks" >> $GITHUB_ENV
 
     - name: Install kubectl
       uses: azure/setup-kubectl@v3
