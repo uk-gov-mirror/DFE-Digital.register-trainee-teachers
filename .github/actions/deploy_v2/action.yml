@@ -85,7 +85,7 @@ runs:
         APP_NAME: ${{ env.APP_NAME }}
         TF_VAR_azure_credentials: ${{ inputs.azure-credentials }}
         CONFIRM_PRODUCTION: true
-        CLUSTER: cluster1
+        CLUSTER: cluster3
 
     - name: Set up environment variables
       shell: bash
