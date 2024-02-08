@@ -2,6 +2,8 @@
 
 module Api
   class BaseController < ActionController::API
+    include ActionController::HttpAuthentication::Token::ControllerMethods
+
     before_action :check_feature_flag!, :authenticate!
 
     def not_found
@@ -33,12 +35,12 @@ module Api
     def auth_token
       return @auth_token if defined?(@auth_token)
 
-      bearer_token = request.headers["Authorization"]
-
-      if bearer_token.blank?
-        @auth_token = nil
-      else
-        @auth_token = AuthenticationToken.authenticate(bearer_token)
+      authenticate_with_http_token do |bearer_token|
+        if bearer_token.blank?
+          @auth_token = nil
+        else
+          @auth_token = AuthenticationToken.authenticate(bearer_token)
+        end
       end
     end
   end
