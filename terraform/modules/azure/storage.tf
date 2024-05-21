@@ -16,11 +16,12 @@ resource "azurerm_storage_account" "tempdata" {
     }
   }
 
-  # network_rules {
-  #   default_action             = "Deny"
-  #   ip_rules                   = []
-  #   virtual_network_subnet_ids = [azurerm_subnet.private_endpoint_subnet.id]
-  # }
+  network_rules {
+    default_action             = "Deny"
+    ip_rules                   = []
+    virtual_network_subnet_ids = [azurerm_subnet.private_endpoint_subnet.id]
+    bypass                     = ["AzureServices"]
+  }
 
   lifecycle {
     ignore_changes = [tags]
@@ -35,7 +36,7 @@ resource "azurerm_storage_container" "tempdata" {
   storage_account_name  = resource.azurerm_storage_account.tempdata[0].name
   container_access_type = "private"
 }
-# to be created by TSC 
+# to be created by TSC
 resource "azurerm_subnet" "private_endpoint_subnet" {
   name                 = "privateEndpointSubnet"
   resource_group_name  = var.backend_resource_group_name
