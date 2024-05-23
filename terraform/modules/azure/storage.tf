@@ -1,3 +1,11 @@
+# Existing subnet data source
+data "azurerm_subnet" "aks_network" {
+  name                 = "aks-snet"
+  virtual_network_name = "s189d01-tsc-cluster3-vnet"
+  resource_group_name  = "s189d01-tsc-dv-rg"
+}
+
+# Existing storage account resource
 resource "azurerm_storage_account" "tempdata" {
   count                           = 1
   name                            = var.tempdata_storage_account_name
@@ -16,11 +24,11 @@ resource "azurerm_storage_account" "tempdata" {
     }
   }
 
-  # network_rules {
-  #   default_action             = "Deny"
-  #   ip_rules                   = []
-  #   virtual_network_subnet_ids = [azurerm_subnet.private_endpoint_subnet.id]
-  # }
+  network_rules {
+    default_action             = "Deny"
+    ip_rules                   = []
+    virtual_network_subnet_ids = [data.azurerm_subnet.aks_network.id]
+  }
 
   lifecycle {
     ignore_changes = [tags]
@@ -29,50 +37,47 @@ resource "azurerm_storage_account" "tempdata" {
   depends_on = [data.azurerm_resource_group.group]
 }
 
-resource "azurerm_storage_container" "tempdata" {
-  count                 = var.deploy_temp_data_storage_account ? 1 : 0
-  name                  = "tempdata"
-  storage_account_name  = azurerm_storage_account.tempdata[0].name
-  container_access_type = "private"
-}
-# to be created by TSC
-resource "azurerm_subnet" "private_endpoint_subnet" {
-  name                 = "privateEndpointSubnet"
-  resource_group_name  = var.backend_resource_group_name
-  virtual_network_name = var.virtual_network_name
-  address_prefixes     = ["10.0.1.0/24"]
-}
-
-resource "azurerm_private_endpoint" "storage_private_endpoint" {
-  name                = "tempdata-storage-private-endpoint"
-  location            = var.region_name
-  resource_group_name = var.backend_resource_group_name
-  subnet_id           = azurerm_subnet.private_endpoint_subnet.id
-
-  private_service_connection {
-    name                           = "tempdata-storage-private-service-connection"
-    private_connection_resource_id = azurerm_storage_account.tempdata[0].id
-    is_manual_connection           = false
-    subresource_names              = ["blob"]
-  }
-}
-
-resource "azurerm_private_dns_zone" "privatelink_blob" {
+# New private DNS zone
+resource "azurerm_private_dns_zone" "example" {
   name                = "privatelink.blob.core.windows.net"
   resource_group_name = var.backend_resource_group_name
 }
 
-resource "azurerm_private_dns_zone_virtual_network_link" "privatelink_blob_vnet" {
-  name                  = "privatelink-blob-vnet-link"
+# Link the private DNS zone to the virtual network
+resource "azurerm_private_dns_zone_virtual_network_link" "example" {
+  name                  = "example-link"
   resource_group_name   = var.backend_resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.privatelink_blob.name
-  virtual_network_id    = azurerm_virtual_network.main.id
+  private_dns_zone_name = azurerm_private_dns_zone.example.name
+  virtual_network_id    = data.azurerm_subnet.aks_network.virtual_network_name
 }
 
-resource "azurerm_private_dns_a_record" "tempdata" {
-  name                = azurerm_storage_account.tempdata[0].primary_blob_endpoint
-  zone_name           = azurerm_private_dns_zone.privatelink_blob.name
+# Create a private endpoint for the storage account
+resource "azurerm_private_endpoint" "example" {
+  name                = "example-private-endpoint"
+  location            = var.region_name
+  resource_group_name = var.backend_resource_group_name
+  subnet_id           = data.azurerm_subnet.aks_network.id
+
+  private_service_connection {
+    name                           = "example-privatelink"
+    private_connection_resource_id = azurerm_storage_account.tempdata.id
+    subresource_names              = ["blob"]
+    is_manual_connection           = false
+  }
+
+  depends_on = [azurerm_storage_account.tempdata]
+}
+
+# Create a DNS record for the private endpoint
+resource "azurerm_private_dns_a_record" "example" {
+  name                = "s189d01registervtmp"
+  zone_name           = azurerm_private_dns_zone.example.name
   resource_group_name = var.backend_resource_group_name
   ttl                 = 300
-  records             = [azurerm_private_endpoint.storage_private_endpoint.private_service_connection[0].private_ip_address]
+  records             = [azurerm_private_endpoint.example.private_service_connection[0].private_ip_address]
+}
+
+# Output the private IP address of the private endpoint for verification
+output "private_endpoint_ip" {
+  value = azurerm_private_endpoint.example.private_service_connection[0].private_ip_address
 }
