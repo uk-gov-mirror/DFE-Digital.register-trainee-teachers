@@ -12,7 +12,7 @@ COPY .tool-versions Gemfile Gemfile.lock ./
 
 RUN apk add --update --no-cache --virtual build-dependances \
     postgresql-dev build-base git && \
-    apk add --update --no-cache libpq yarn shared-mime-info && \
+    apk add --update --no-cache libpq yarn shared-mime-info git && \
     bundle install --jobs=4 && \
     rm -rf /usr/local/bundle/cache && \
     apk del build-dependances
@@ -27,9 +27,6 @@ RUN bundle exec bootsnap precompile app/ lib/
 
 RUN echo export PATH=/usr/local/bin:\$PATH > /root/.ashrc
 ENV ENV="/root/.ashrc"
-
-# Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-# RUN SECRET_KEY_BASE=DUMMY ./bin/rails assets:precompile
 
 ARG COMMIT_SHA
 ENV COMMIT_SHA=$COMMIT_SHA
