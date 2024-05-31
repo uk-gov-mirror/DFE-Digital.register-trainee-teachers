@@ -1,0 +1,21 @@
+{
+  "name": "Ruby on Rails",
+  "image": "mcr.microsoft.com/devcontainers/ruby:0-3.0",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "16"
+    },
+    "ghcr.io/devcontainers/features/postgres:1": {
+      "version": "13"
+    }
+  },
+  "postCreateCommand": "bundle install && rails db:setup",
+  "forwardPorts": [3000],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rebornix.Ruby"
+      ]
+    }
+  }
+}
