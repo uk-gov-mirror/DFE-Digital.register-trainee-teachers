@@ -8,7 +8,7 @@ RUN apk add --update --no-cache tzdata && \
   cp /usr/share/zoneinfo/Europe/London /etc/localtime && \
   echo "Europe/London" > /etc/timezone
 
-COPY .tool-versions Gemfile Gemfile.lock ./
+COPY ../tool-versions ../Gemfile ../Gemfile.lock ./
 
 RUN apk add --update --no-cache --virtual build-dependances \
   postgresql-dev build-base git && \
@@ -17,7 +17,7 @@ RUN apk add --update --no-cache --virtual build-dependances \
   rm -rf /usr/local/bundle/cache && \
   apk del build-dependances
 
-COPY package.json yarn.lock ./
+COPY ../package.json ../yarn.lock ./
 RUN yarn install --frozen-lockfile --ignore-scripts
 
 COPY . .
