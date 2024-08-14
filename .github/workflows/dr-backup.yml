@@ -1,0 +1,39 @@
+name: Backup Postgres for DR test
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to backup
+        required: true
+        type: choice
+        default: qa
+        options:
+        - qa
+      backup-file:
+        description: Filename of backup
+        required: true
+
+  push:
+    branches:
+      - 1977-backup-ptr-database-using-github-action
+
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Backup postgres
+        uses: DFE-Digital/github-actions/backup-postgres@1977-backup-ptr-database-using-github-action
+        with:
+          storage-account: s189d01rttdbbkprvsa
+          resource-group: s189d01-rtt-rv-rg
+          app-name: register-rm1
+          cluster: dev
+          azure-credentials: ${{ secrets.AZURE_CREDENTIALS_DV_REVIEW_AKS }}
+          backup-file: drbackup140824-ptr.sql
+          ptr-db-server-name: s189d01-rtt-rv-pg-ptr
