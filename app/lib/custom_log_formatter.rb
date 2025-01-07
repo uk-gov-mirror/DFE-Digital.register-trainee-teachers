@@ -22,7 +22,7 @@ private
   def format_exception
     exception_message = hash.dig(:exception, :message)
     if exception_message.present?
-      hash[:message] = "Exception occured: #{exception_message}"
+      hash[:message] = "Exception occurred: #{exception_message}"
     end
   end
 
@@ -41,7 +41,7 @@ private
       message_lines = hash[:message].split("\n")
       if message_lines.all? { |line| line.start_with?("/") }
         hash[:backtrace] = hash[:message]
-        hash[:message] = "Exception occured: #{message_lines.first}"
+        hash[:message] = "Exception occurred: #{message_lines.first}"
       end
     end
   end
@@ -61,8 +61,4 @@ private
   def method_is_post_or_put?
     hash.dig(:payload, :method).in?(%w[PUT POST])
   end
-end
-
-unless Rails.env.local?
-  SemanticLogger.add_appender(io: $stdout, level: :info, formatter: CustomLogFormatter.new)
 end

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "active_support/core_ext/integer/time"
+require Rails.root.join("app/lib/custom_log_formatter")
 
 Rails.application.configure do
   config.after_initialize do
@@ -89,4 +90,9 @@ Rails.application.configure do
 
   config.active_job.queue_adapter = :sidekiq
   config.public_file_server.enabled = true
+
+  config.semantic_logger.backtrace_level = :info
+  config.colorize_logging = false
+  config.rails_semantic_logger.ap_options = { multiline: true }
+  config.semantic_logger.add_appender(io: $stdout, level: :info, formatter: CustomLogFormatter.new)
 end
