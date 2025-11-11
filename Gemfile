@@ -123,7 +123,7 @@ gem "mechanize" # interact with HESA
 gem "dfe-reference-data", require: "dfe/reference_data", github: "DFE-Digital/dfe-reference-data", tag: "v3.8.4"
 
 # for sending analytics data to the analytics platform
-gem "dfe-analytics", github: "DFE-Digital/dfe-analytics", tag: "v1.15.9"
+gem "dfe-analytics", github: "DFE-Digital/dfe-analytics", tag: "v1.15.10"
 
 gem "ruby-progressbar" # useful for tracking long running rake tasks
 
@@ -207,7 +207,7 @@ group :test do
   gem "cuprite", "~> 0.17"
   gem "selenium-webdriver"
 
-  gem "shoulda-matchers", "~> 6.5"
+  gem "shoulda-matchers", "~> 7.0"
   # Code coverage reporter
   gem "simplecov", "~> 0.22.0", require: false
   gem "simplecov-json"
