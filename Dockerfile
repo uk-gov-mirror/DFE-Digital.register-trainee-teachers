@@ -63,7 +63,7 @@ RUN apk add --update --no-cache tzdata && \
     echo "Europe/London" > /etc/timezone
 
 RUN apk add --no-cache libxml2
-RUN apk add --update --no-cache npm git build-base postgresql-dev
+RUN apk add --update --no-cache npm git build-base postgresql-dev linux-headers
 
 COPY --from=rails-build /usr/local/bundle /usr/local/bundle
 
